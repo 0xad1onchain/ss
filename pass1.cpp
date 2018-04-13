@@ -47,11 +47,11 @@ void pass1(string ifile,string ofile)
     fstream outfile(ofile.c_str(),ios::out);
     string line,label,mnemonic,operand;
 
-    // Read lines from input (label, mnemonic, operand) or comment
+    
     while(getline(infile,line))
     {
         lineno++;
-        //handle comments
+        
         if(line[0] == '.')
         {
             outfile<<line<<endl;
@@ -59,7 +59,7 @@ void pass1(string ifile,string ofile)
         }
         tokenize(line,label,mnemonic,operand);
 
-        //handle start
+        
         if(mnemonic == "START")
         {
             stringstream temp(operand);
@@ -67,7 +67,7 @@ void pass1(string ifile,string ofile)
             outfile<<"\t"<<line<<endl;
             continue;
         }
-        //handle end
+       
         if(mnemonic == "END")
         {
             stringstream temp;
@@ -76,31 +76,31 @@ void pass1(string ifile,string ofile)
             outfile<<temp.str()<<"\t"<<line<<endl;
             break;
         }
-        //handle symbols
+       
         if ( label.size() != 0 )
         {
             if((iter=symtab.find(label))!=symtab.end())
             {
-                cout<<"Line:"<<lineno<<" - Error! Symbol "<<iter->first<<" redefined!\n";
+                cout<<"Line:"<<lineno<<" - Error Symbol "<<iter->first<<" redefined!\n";
                 break;
             }
-            //save location
+            
             stringstream temp;
             temp <<setfill('0')<<setw(4)<<uppercase<<hex<<loc;
             symtab[label] = temp.str();
         }
         outfile<<setfill('0')<<setw(4)<<uppercase<<hex<<loc<<"\t"<<line<<"\n";
-        //handle location counter updates
+        
         if((iter = optab.find(mnemonic))!=optab.end())
         {
             if(iter->second != "*")
             {
-                //normal instruction, increment locctr by 3 bytes;
+                
                 loc+=3;
             }
             else
             {
-                // Handle resw, resb
+                
                 if(iter->first == "RESW")
                 {
                     stringstream temp(operand);
@@ -115,7 +115,7 @@ void pass1(string ifile,string ofile)
                     temp>>inc;
                     loc+=inc;
                 }
-                // Handle byte,word
+                
                 else if(iter->first == "WORD")
                 {
                     loc+=3;
@@ -131,14 +131,14 @@ void pass1(string ifile,string ofile)
                     }
                     else
                     {
-                        cout<<"Error, Invalid Symbol on line: "<<lineno<<endl;
+                        cout<<"Error Symbol not valid on line: "<<lineno<<endl;
                     }
                 }
             }
         }
         else
         {
-            cout<<"Error: Undefined Opcode on line " << lineno<<endl;
+            cout<<"Error: Unknown Opcode on line " << lineno<<endl;
             break;
         }
     }
